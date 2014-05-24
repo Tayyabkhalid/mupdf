@@ -943,7 +943,7 @@ void handlekey(int c)
 	winrepaint(&gapp);
 }
 
-void handlemouse(int x, int y, int btn, int state)
+void handlemouse(int x, int y, int btn, int modifiers, int state)
 {
 	if (state != 0 && timer_pending)
 		killtimer(&gapp);
@@ -959,7 +959,7 @@ void handlemouse(int x, int y, int btn, int state)
 	if (state == -1)
 		ReleaseCapture();
 
-	pdfapp_onmouse(&gapp, x, y, btn, 0, state);
+	pdfapp_onmouse(&gapp, x, y, btn, modifiers, state);
 }
 
 LRESULT CALLBACK
@@ -1027,6 +1027,7 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	static int oldy = 0;
 	int x = (signed short) LOWORD(lParam);
 	int y = (signed short) HIWORD(lParam);
+	int modifiers = (wParam & MK_SHIFT) >> 2;
 
 	switch (message)
 	{
@@ -1061,35 +1062,35 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN:
 		SetFocus(hwndview);
 		oldx = x; oldy = y;
-		handlemouse(x, y, 1, 1);
+		handlemouse(x, y, 1, modifiers, 1);
 		return 0;
 	case WM_MBUTTONDOWN:
 		SetFocus(hwndview);
 		oldx = x; oldy = y;
-		handlemouse(x, y, 2, 1);
+		handlemouse(x, y, 2, modifiers, 1);
 		return 0;
 	case WM_RBUTTONDOWN:
 		SetFocus(hwndview);
 		oldx = x; oldy = y;
-		handlemouse(x, y, 3, 1);
+		handlemouse(x, y, 3, modifiers, 1);
 		return 0;
 
 	case WM_LBUTTONUP:
 		oldx = x; oldy = y;
-		handlemouse(x, y, 1, -1);
+		handlemouse(x, y, 1, modifiers, -1);
 		return 0;
 	case WM_MBUTTONUP:
 		oldx = x; oldy = y;
-		handlemouse(x, y, 2, -1);
+		handlemouse(x, y, 2, modifiers, -1);
 		return 0;
 	case WM_RBUTTONUP:
 		oldx = x; oldy = y;
-		handlemouse(x, y, 3, -1);
+		handlemouse(x, y, 3, modifiers, -1);
 		return 0;
 
 	case WM_MOUSEMOVE:
 		oldx = x; oldy = y;
-		handlemouse(x, y, 0, 0);
+		handlemouse(x, y, 0, modifiers, 0);
 		return 0;
 
 	/* Mouse wheel */
@@ -1107,7 +1108,7 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			timer_pending = 0;
 			handlekey(VK_RIGHT + 256);
-			handlemouse(oldx, oldy, 0, 0); /* update cursor */
+			handlemouse(oldx, oldy, 0, 0, 0); /* update cursor */
 			return 0;
 		}
 		break;
@@ -1127,7 +1128,7 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case VK_NEXT:
 		case VK_ESCAPE:
 			handlekey(wParam + 256);
-			handlemouse(oldx, oldy, 0, 0);	/* update cursor */
+			handlemouse(oldx, oldy, 0, 0, 0);	/* update cursor */
 			return 0;
 		}
 		return 1;
@@ -1137,7 +1138,7 @@ viewproc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (wParam < 256)
 		{
 			handlekey(wParam);
-			handlemouse(oldx, oldy, 0, 0);	/* update cursor */
+			handlemouse(oldx, oldy, 0, 0, 0);	/* update cursor */
 		}
 		return 0;
 
